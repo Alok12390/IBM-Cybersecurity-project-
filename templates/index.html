@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mail-Guard — Phishing & Vulnerability Detector</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <span class="logo-icon">✉️🔒</span>
+      <div>
+        <span class="logo-title">Mail-Guard</span>
+        <span class="logo-sub">Phishing & Vulnerability Detector</span>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button class="tab active" data-tab="email">📧 Email Analyzer</button>
+      <button class="tab" data-tab="vuln">🔍 Vulnerability Scanner</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ===== EMAIL ANALYZER ===== -->
+  <section id="tab-email" class="tab-panel active">
+    <div class="panel-intro">
+      <h2>Phishing Email Analyzer</h2>
+      <p>Paste raw email content, headers, or individual fields to detect phishing indicators.</p>
+    </div>
+
+    <div class="form-grid">
+      <div class="card input-card">
+        <div class="input-mode-toggle">
+          <button class="mode-btn active" data-mode="fields">Field Mode</button>
+          <button class="mode-btn" data-mode="raw">Raw Email / Headers</button>
+        </div>
+
+        <!-- Field mode -->
+        <div id="field-mode">
+          <div class="field-group">
+            <label>Sender / From</label>
+            <input type="text" id="email-sender" placeholder="e.g. support@paypa1.com" />
+          </div>
+          <div class="field-group">
+            <label>Subject</label>
+            <input type="text" id="email-subject" placeholder="e.g. URGENT: Verify your account now!" />
+          </div>
+          <div class="field-group">
+            <label>Email Body</label>
+            <textarea id="email-body" rows="10" placeholder="Paste the full email body here (including any URLs)..."></textarea>
+          </div>
+        </div>
+
+        <!-- Raw mode -->
+        <div id="raw-mode" style="display:none">
+          <div class="field-group">
+            <label>Raw Email Source <small>(paste full .eml content or email headers)</small></label>
+            <textarea id="email-raw" rows="16" placeholder="Paste raw email source here (Received: headers, From:, Subject:, body, etc.)..."></textarea>
+          </div>
+        </div>
+
+        <div class="sample-bar">
+          <span>Try a sample:</span>
+          <button class="sample-btn" onclick="loadSample('phishing')">Phishing Email</button>
+          <button class="sample-btn" onclick="loadSample('legit')">Legitimate Email</button>
+        </div>
+
+        <button class="btn-analyze" id="btn-analyze-email" onclick="analyzeEmail()">
+          <span class="btn-text">Analyze Email</span>
+          <span class="btn-spinner" style="display:none">Analyzing...</span>
+        </button>
+      </div>
+
+      <div class="card results-card" id="email-results" style="display:none">
+        <div class="result-header">
+          <div>
+            <div class="result-label">Phishing Risk Score</div>
+            <div class="result-score" id="email-score">0</div>
+          </div>
+          <div class="risk-badge" id="email-risk-badge">Low</div>
+        </div>
+
+        <div class="score-bar-wrap">
+          <div class="score-bar">
+            <div class="score-fill" id="email-score-fill" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="result-summary" id="email-summary"></div>
+
+        <div class="result-sections">
+          <div class="result-section" id="email-findings-section">
+            <h4>🔎 Key Findings</h4>
+            <ul id="email-findings-list"></ul>
+          </div>
+
+          <div class="result-section" id="email-keywords-section" style="display:none">
+            <h4>🚩 Phishing Keywords Detected</h4>
+            <div class="keyword-chips" id="email-keyword-chips"></div>
+          </div>
+
+          <div class="result-section" id="email-urls-section" style="display:none">
+            <h4>🔗 URL Analysis</h4>
+            <div id="email-url-details"></div>
+          </div>
+
+          <div class="result-section" id="email-headers-section" style="display:none">
+            <h4>📬 Header Analysis (SPF / DKIM / DMARC)</h4>
+            <ul id="email-header-list"></ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="card placeholder-card" id="email-placeholder">
+        <div class="placeholder-inner">
+          <div class="placeholder-icon">📧</div>
+          <p>Fill in the email fields and click <strong>Analyze Email</strong> to get a detailed phishing risk report.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== VULNERABILITY SCANNER ===== -->
+  <section id="tab-vuln" class="tab-panel">
+    <div class="panel-intro">
+      <h2>Website Vulnerability Scanner</h2>
+      <p>Enter a URL to scan for security misconfigurations, exposed paths, weak SSL, and open ports.</p>
+    </div>
+
+    <div class="form-grid">
+      <div class="card input-card">
+        <div class="field-group">
+          <label>Target URL</label>
+          <input type="text" id="vuln-url" placeholder="https://example.com" />
+        </div>
+
+        <div class="check-grid">
+          <div class="check-item"><span class="check-icon">🔒</span><span>SSL / TLS Certificate</span></div>
+          <div class="check-item"><span class="check-icon">🛡️</span><span>Security Headers</span></div>
+          <div class="check-item"><span class="check-icon">📁</span><span>Exposed Sensitive Paths</span></div>
+          <div class="check-item"><span class="check-icon">🔌</span><span>Open Port Scan</span></div>
+        </div>
+
+        <div class="sample-bar">
+          <span>Try a sample:</span>
+          <button class="sample-btn" onclick="document.getElementById('vuln-url').value='https://example.com'">example.com</button>
+          <button class="sample-btn" onclick="document.getElementById('vuln-url').value='http://testphp.vulnweb.com'">vulnweb.com</button>
+        </div>
+
+        <div class="warning-box">
+          ⚠️ <strong>Legal notice:</strong> Only scan websites you own or have explicit written permission to test. Unauthorized scanning may be illegal.
+        </div>
+
+        <button class="btn-analyze" id="btn-analyze-vuln" onclick="scanVuln()">
+          <span class="btn-text">Start Scan</span>
+          <span class="btn-spinner" style="display:none">Scanning... (may take ~30s)</span>
+        </button>
+      </div>
+
+      <div class="card results-card" id="vuln-results" style="display:none">
+        <div class="result-header">
+          <div>
+            <div class="result-label">Vulnerability Risk Score</div>
+            <div class="result-score" id="vuln-score">0</div>
+          </div>
+          <div class="risk-badge" id="vuln-risk-badge">Low</div>
+        </div>
+
+        <div class="score-bar-wrap">
+          <div class="score-bar">
+            <div class="score-fill" id="vuln-score-fill" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="result-summary" id="vuln-summary"></div>
+
+        <div class="result-sections">
+          <div class="result-section">
+            <h4>🔒 SSL / TLS</h4>
+            <ul id="vuln-ssl-list"></ul>
+          </div>
+          <div class="result-section">
+            <h4>🛡️ Security Headers</h4>
+            <ul id="vuln-header-list"></ul>
+          </div>
+          <div class="result-section">
+            <h4>📁 Sensitive Path Exposure</h4>
+            <ul id="vuln-path-list"></ul>
+          </div>
+          <div class="result-section">
+            <h4>🔌 Open Ports</h4>
+            <div id="vuln-ports-wrap">
+              <ul id="vuln-port-list"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card placeholder-card" id="vuln-placeholder">
+        <div class="placeholder-inner">
+          <div class="placeholder-icon">🔍</div>
+          <p>Enter a URL and click <strong>Start Scan</strong> to audit the site for security vulnerabilities.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <p>PhishGuard — For educational and authorized security testing only. Always obtain permission before scanning third-party systems.</p>
+</footer>
+
+<script src="/static/js/main.js"></script>
+</body>
+</html>
